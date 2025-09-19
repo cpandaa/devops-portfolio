@@ -1,0 +1,4 @@
+---
+- name: Dummy playbook
+  hosts: all
+  tasks: []

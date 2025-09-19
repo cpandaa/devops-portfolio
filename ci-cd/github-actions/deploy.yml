@@ -1,0 +1,64 @@
+name: Build & Deploy (ECR → EKS)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO: demo-app
+  IMAGE_TAG: ${{ github.sha }}
+  CLUSTER_NAME: prod-eks
+  K8S_NAMESPACE: demo
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push Image
+        run: |
+          docker build -t $ECR_REPO:$IMAGE_TAG .
+          docker tag $ECR_REPO:$IMAGE_TAG ${{ steps.ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG
+          docker push ${{ steps.ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG
+
+      - name: Upload image ref
+        run: echo "IMAGE=${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+
+      - name: Set image & apply manifests
+        run: |
+          sed -e "s|IMAGE_PLACEHOLDER|$IMAGE|g" kubernetes/manifests/deployment.yaml | kubectl apply -n $K8S_NAMESPACE -f -
+          kubectl apply -n $K8S_NAMESPACE -f kubernetes/manifests/service.yaml
+          kubectl apply -n $K8S_NAMESPACE -f kubernetes/manifests/hpa.yaml
+

@@ -1,0 +1,19 @@
+---
+groups:
+  - name: k8s-demo-app
+    rules:
+      - alert: HighCPUUsage
+        expr: avg(rate(container_cpu_usage_seconds_total{pod=~"demo-app.*"}[5m])) > 0.5
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "High CPU for demo-app"
+          description: "CPU > 50% for 5m"
+      - alert: PodRestarts
+        expr: increase(kube_pod_container_status_restarts_total{pod=~"demo-app.*"}[10m]) > 3
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: "Frequent restarts"
+          description: "Pod restarted >3 times in 10m"
+

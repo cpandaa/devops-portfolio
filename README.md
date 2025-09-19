@@ -36,3 +36,10 @@ This portfolio demonstrates my hands-on ability to:
 - Apply **real-world experience** to solve enterprise infrastructure challenges  
 
 ---
+
+- **CI/CD**: [.github/actions → ECR/EKS deploy](ci-cd/github-actions/deploy.yml)
+- **IaC**: [Terraform – VPC + EKS](infrastructure-as-code/terraform/)
+- **K8s**: [Deployment/Service/HPA](kubernetes/manifests/)
+- **Observability**: [Prometheus alerts](monitoring-logging/prometheus/alerts.yml), [Grafana dashboard](monitoring-logging/grafana/dashboards/demo-app.json)
+- **Automation**: [Rollout script](automation-scripts/bash/rollout.sh), [Windows runner install](automation-scripts/powershell/install-gh-runner.ps1)
+
