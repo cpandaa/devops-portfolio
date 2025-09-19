@@ -6,7 +6,7 @@ set -euo pipefail
 
 echo "[INFO] Checking OS..."
 if ! grep -qiE "red hat|centos|rocky|alma" /etc/os-release; then
-  echo "[ERROR] This script is intended for RHEL/CentOS/Rocky/AlmaLinux only."
+  echo "[ERROR] This script is intended for RHEL/CentOS/ only."
   exit 1
 fi
 
