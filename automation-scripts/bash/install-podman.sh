@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 echo Install Podman script
 #!/usr/bin/env bash
-# install-podman.sh - Install Podman on RHEL/CentOS/Rocky/AlmaLinux
+# install-podman.sh - Install Podman on RHEL/CentOS
 set -euo pipefail
 
 echo "[INFO] Checking OS..."
 if ! grep -qiE "red hat|centos|rocky|alma" /etc/os-release; then
-  echo "[ERROR] This script is intended for RHEL/CentOS/Rocky/AlmaLinux only."
+  echo "[ERROR] This script is intended for RHEL/CentOS/ only."
   exit 1
 fi
 
